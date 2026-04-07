@@ -146,7 +146,9 @@ export default function ProjectView({ projectId, onBack }) {
         const lines = sbContent.slice(0, 5000).split('\n');
         const hasType2Structure = lines.some(line => {
             const pipeCount = (line.match(/\|/g) || []).length;
-            return pipeCount >= 7;
+            // Type 2 has 7 columns = 8 pipes. Standard Type 1 header has 4 pipes.
+            // Using 7 as a threshold was too sensitive to smaller tables or lines with pipes.
+            return pipeCount >= 8;
         });
 
         if (hasType2Structure) {
@@ -180,31 +182,42 @@ export default function ProjectView({ projectId, onBack }) {
 
                 // Find target ID (Combined: Header | Row label)
                 let headerLabel = null;
+                let titleLabel = null;
                 let rowLabel = node.parentNode.children[0].textContent.trim();
 
                 // Look back for the nearest Screen or Module header
-                let prev = node.closest('table').previousElementSibling;
+                const tableObj = node.closest('table');
+                let prev = tableObj ? tableObj.previousElementSibling : null;
                 while (prev) {
                     const match = prev.textContent.match(/(Screen\s+\d+\.\d+|Module\s+(\d+|[A-Z]))/i);
                     if (match) {
                         headerLabel = match[1];
+                        titleLabel = prev.textContent.trim().replace(headerLabel, '').replace(/^[:\-\s\|]+/, '').trim();
                         break;
                     }
                     prev = prev.previousElementSibling;
                 }
 
-                // Unambiguous targeting: "Header | Row" (e.g. "Module 1 | Intro")
                 let targetID = headerLabel;
-                if (headerLabel && rowLabel) {
-                    // Even if colIndex is 0 (selecting the label itself), 
-                    // we want the AI to know we are targeting THAT row in THAT header.
-                    targetID = `${headerLabel} | ${rowLabel}`;
-                } else if (!headerLabel) {
-                    targetID = rowLabel;
+                if (headerLabel) {
+                    const numRows = tableObj ? tableObj.querySelectorAll('tbody tr').length : 0;
+                    if (numRows === 1 && titleLabel) {
+                        targetID = `${headerLabel} | ${titleLabel}`;
+                    } else if (rowLabel) {
+                        const cleanLabel = rowLabel.length > 100 ? titleLabel || rowLabel.substring(0, 50) : rowLabel;
+                        targetID = `${headerLabel} | ${cleanLabel}`;
+                    }
+                } else if (rowLabel) {
+                    targetID = rowLabel.length > 100 ? rowLabel.substring(0, 50) : rowLabel;
                 }
 
                 if (targetID) {
-                    setSelectionContext({ text, screenNum: targetID, colIndex, rect });
+                    // Extract column name from header
+                    const table = node.closest('table');
+                    const ths = table.querySelectorAll('thead th');
+                    const colName = ths[colIndex]?.textContent.trim() || '';
+                    
+                    setSelectionContext({ text, screenNum: targetID, colIndex, colName, rect });
                 }
             }
         };
@@ -426,7 +439,8 @@ export default function ProjectView({ projectId, onBack }) {
                 current_content: currentContent,
                 selected_text: selectionContext?.text,
                 selected_screen_num: selectionContext?.screenNum,
-                selected_col_index: selectionContext?.colIndex
+                selected_col_index: selectionContext?.colIndex,
+                selected_col_name: selectionContext?.colName
             };
             const res = await api.request(`/edit/chat?project_id=${projectId}`, {
                 method: 'POST', body: JSON.stringify(payload)
@@ -720,7 +734,7 @@ export default function ProjectView({ projectId, onBack }) {
                             {isSbEditing ? (
                                 <div ref={sbEditorRef} className="markdown-preview" contentEditable={true} suppressContentEditableWarning={true} style={{ padding: '2rem', minHeight: '700px', outline: 'none', background: '#FAFEFF', cursor: 'text', border: '2px solid var(--secondary)', borderTop: 'none' }} />
                             ) : (
-                                pendingEdit && pendingEdit.docType === 'storyboard' ? (
+                                pendingEdit && (pendingEdit.docType === 'storyboard' || pendingEdit.docType === 'Storyboard Type 2') ? (
                                     <DiffViewer oldText={pendingEdit.originalContent} newText={pendingEdit.newContent} cleanMarkdown={cleanMarkdown} />
                                 ) : (
                                     <div className="markdown-preview" style={{ padding: '2rem' }} dangerouslySetInnerHTML={{ __html: sbDisplayHtml || marked.parse(cleanMarkdown(sbContent)) }} />

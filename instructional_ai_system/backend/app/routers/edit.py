@@ -37,7 +37,8 @@ def ai_chat_edit(request: schemas.DocumentEditRequest, project_id: str, db: Sess
         chat_history,
         selected_text=request.selected_text,
         selected_screen_num=request.selected_screen_num,
-        selected_col_index=request.selected_col_index
+        selected_col_index=request.selected_col_index,
+        selected_col_name=request.selected_col_name
     )
     
     # Save assistant message

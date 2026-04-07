@@ -50,6 +50,7 @@ class DocumentEditRequest(BaseModel):
     selected_text: Optional[str] = None
     selected_screen_num: Optional[str] = None
     selected_col_index: Optional[int] = None
+    selected_col_name: Optional[str] = None
 
 # --- Project Schemas ---
 class ProjectBase(BaseModel):

@@ -127,7 +127,7 @@ REQUIRED ASSESSMENT TYPES:
 {strategies['assessment']}
 
 SOURCE CONTENT:
-{content[:15000]}
+{content[:8000]}
 
 TASK:
 Create a DETAILED Design Document following this EXACT structure.
@@ -209,128 +209,107 @@ Generate the complete Design Document now:"""
             ],
             model="llama-3.1-8b-instant",
             temperature=0.7,
-            max_tokens=4500,
+            max_tokens=2000,
         )
         result = chat_completion.choices[0].message.content
         return result
             
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error generating Design Document: {str(e)}")
+        # Increase visibility of errors
+        error_msg = str(e)
+        raise HTTPException(status_code=500, detail=f"Error generating Design Document: {error_msg}")
+
 
 import time as _time
 
 def _generate_single_module_type1(client, module_num: int, total_modules: int, design_doc: str, intake_data: Dict, content: str, strategies: Dict) -> str:
-    """Generate storyboard for a single module (Type 1 format)."""
-    prompt = f"""You are an expert eLearning Storyboard Developer. Generate the storyboard for ONE MODULE ONLY.
+    """Generate storyboard for a single module (Type 1 format). Kept under 6000 TPM."""
+    prompt = f"""Generate storyboard for MODULE {module_num} ONLY (of {total_modules}).
 
-DESIGN DOCUMENT (for context and module titles):
-{design_doc[:20000]}
-
-INTAKE INFORMATION:
-{format_intake_text(intake_data)}
-
-VISUAL STRATEGIES: {strategies['visual'][:500]}
-INTERACTIVITY: {strategies['interactivity'][:500]}
+DESIGN DOCUMENT:
+{design_doc[:3000]}
 
 SOURCE CONTENT:
-{content[:10000]}
+{content[:2000]}
 
-TASK:
-Generate the storyboard for MODULE {module_num} ONLY (out of {total_modules} total).
-Find the matching module title from the DESIGN DOCUMENT's MODULE BREAKDOWN table.
-Generate **5-8 screens** for this module.
+RULES:
+- OST: Actual text learner reads. Real facts, definitions, bullet points. NEVER "The narrator explains..."
+- AUDIO: Actual narrator script. Conversational, professional, 5-8 sentences. End with "Click Next to continue." NEVER "The narrator says..."
+- VISUAL: Specific designer directions. Name images ("Show static image of X"), describe animations, layout, navigation.
+- No placeholders. No AI buzzwords. Content from source only.
+- Use <br> for line breaks in cells. Each row = ONE line.
 
-FORMATTING RULES:
-1. NO NEWLINES inside table cells. Use `<br>` for ALL line breaks.
-2. Generate exactly THREE columns separated by pipes (`|`).
-3. Screen titles numbered as Screen {module_num}.1, {module_num}.2, etc.
-4. NO GENERIC PLACEHOLDERS. Every detail must be specific.
-5. Each screen: 3-5 substantive bullet points for OST, 5-8 sentence narration script, detailed visual descriptions.
-
-OUTPUT FORMAT:
+FORMAT:
 
 =============================================================================
-Module {module_num}: [Module Title from Design Doc]
-Topic: [First Topic Name]
+Module {module_num}: [Title from Design Doc]
 =============================================================================
 
-Screen {module_num}.1 Title: [Specific Descriptive Title]
+Screen {module_num}.1 Title: [Descriptive Title]
 
-| On-Screen Text (OST) | Audio Narration | Visual Instructions & Developer Notes |
+| ON-SCREEN TEXT (OST) | AUDIO NARRATION | VISUAL INSTRUCTIONS & DEVELOPER NOTES |
 | :--- | :--- | :--- |
-| • [Point 1]<br>• [Point 2]<br>• [Point 3]<br>• [Point 4] | [5-8 sentence narration] | • Visual description<br>• Layout details<br>• Navigation instructions |
+| [Actual text with bullets] | [Actual narration script] | [Specific graphic directions] |
 
-Screen {module_num}.2 Title: [Next Descriptive Title]
-[Continue with more screens...]
+Generate 5-8 screens for Module {module_num} now:"""
 
-Generate Module {module_num} now:"""
-
-    chat_completion = client.chat.completions.create(
+    r = client.chat.completions.create(
         messages=[
-            {"role": "system", "content": "You are an expert eLearning Storyboard Developer who creates detailed, screen-by-screen storyboards. You always base content on the provided materials and never use generic placeholders."},
+            {"role": "system", "content": "You are a senior eLearning Storyboard Developer. Write production-ready storyboards. OST = real learner text. Audio = actual narrator script (conversational, never meta-descriptions like 'The narrator explains'). Visual = specific graphic designer directions with named images and animations. No AI slop."},
             {"role": "user", "content": prompt}
         ],
         model="llama-3.1-8b-instant",
         temperature=0.7,
-        max_tokens=8000,
+        max_tokens=2000,
     )
-    return chat_completion.choices[0].message.content
+    return r.choices[0].message.content
 
 
 def _generate_single_module_type2(client, module_num: int, total_modules: int, design_doc: str, intake_data: Dict, content: str, strategies: Dict) -> str:
-    """Generate storyboard for a single module (Type 2 tabular format)."""
-    prompt = f"""You are an expert eLearning Storyboard Developer. Generate the tabular storyboard for ONE MODULE ONLY.
+    """Generate storyboard for a single module (Type 2 tabular format). Kept under 6000 TPM."""
+    prompt = f"""Generate Type 2 tabular storyboard for MODULE {module_num} ONLY (of {total_modules}).
 
-DESIGN DOCUMENT (for context):
-{design_doc[:20000]}
-
-INTAKE INFORMATION:
-{format_intake_text(intake_data)}
-
-VISUAL STRATEGIES: {strategies['visual'][:500]}
-INTERACTIVITY: {strategies['interactivity'][:500]}
+DESIGN DOCUMENT:
+{design_doc[:3000]}
 
 SOURCE CONTENT:
-{content[:10000]}
+{content[:2000]}
 
-TASK:
-Generate the **Type 2 (Tabular)** storyboard for MODULE {module_num} ONLY (out of {total_modules} total).
-Find the matching module title from the DESIGN DOCUMENT.
-Generate **5-8 rows** for this module.
+RULES:
+- SECTION: Descriptive names (Introduction, Core Concepts, Activity, Quiz, Summary).
+- TOPICS: Specific objectives and sub-topics from source.
+- VISUAL: Specific directions ("Show static image of X", animations, layouts, facilitator videos).
+- OST: Actual learner-facing text with bullets. Real definitions, facts. NEVER meta-descriptions.
+- AUDIO: Actual narrator script. Conversational, professional. NEVER "The narrator explains". Include cues like "Show image #1>>". End with "Click Next to continue."
+- STATUS: "Draft".
+- ACTIONS: Production notes ("Slide design required", "Animation needed").
+- Use <br> for line breaks. Each row = ONE line. 7 columns exactly.
 
-FORMATTING RULES:
-1. NO NEWLINES inside cells. Use `<br>` for ALL line breaks.
-2. Use `•` for bullet points.
-3. All content for a single row must be on ONE line of text.
-4. EXACTLY 7 columns separated by pipes (`|`).
-5. NO GENERIC PLACEHOLDERS.
+FORMAT:
 
-OUTPUT FORMAT:
-
-MODULE {module_num}: [Module Name from Design Doc]
+MODULE {module_num}: [Title from Design Doc]
 
 | Section | Topics | Visual Instructions/Developer Notes | On-screen text | Audio Narration | Status | Actions required |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| Intro | [Specific Sub-Topic] | • Visual description<br>• Layout details | • [Bullet 1]<br>• [Bullet 2]<br>• [Bullet 3] | [5-8 sentence narration] | Draft | [Actions] |
-| Content | [Next Sub-Topic] | • Visual description | • [Bullet 1]<br>• [Bullet 2]<br>• [Bullet 3] | [5-8 sentence narration] | Draft | [Actions] |
+| [Name] | [Topics] | [Visual directions] | [Actual OST] | [Actual script] | Draft | [Actions] |
 
-Generate Module {module_num} now:"""
+Generate 5-8 rows for Module {module_num} now:"""
 
-    chat_completion = client.chat.completions.create(
+    r = client.chat.completions.create(
         messages=[
-            {"role": "system", "content": "You are an expert eLearning Storyboard Developer who creates detailed, screen-by-screen storyboards. You always base content on the provided materials and never use generic placeholders."},
+            {"role": "system", "content": "You are a senior eLearning Storyboard Developer. Write production-ready storyboards. On-screen text = real learner content. Audio = actual narrator script (conversational, never 'The narrator explains'). Visual = specific developer directions. No AI slop."},
             {"role": "user", "content": prompt}
         ],
         model="llama-3.1-8b-instant",
         temperature=0.7,
-        max_tokens=8000,
+        max_tokens=2000,
     )
-    return chat_completion.choices[0].message.content
+    return r.choices[0].message.content
 
 
-@retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=2, min=4, max=30), reraise=True)
+@retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=3, min=5, max=60), reraise=True)
 def _call_module_with_retry(generate_fn, client, module_num, total_modules, design_doc, intake_data, content, strategies):
-    """Wrapper to retry individual module generation."""
+    """Wrapper to retry individual module generation with exponential backoff for rate limits."""
     return generate_fn(client, module_num, total_modules, design_doc, intake_data, content, strategies)
 
 
@@ -357,8 +336,9 @@ def generate_storyboard(api_key: str, design_doc: str, intake_data: Dict, conten
             module_content = fix_markdown_tables(module_content)
             all_modules.append(module_content)
             # Rate limit delay between modules (Groq free tier)
+            # 20s gap prevents TPM (tokens per minute) limit errors with larger outputs
             if i < num_modules:
-                _time.sleep(3)
+                _time.sleep(20)
 
         return "\n\n---\n\n".join(all_modules)
 
@@ -581,23 +561,23 @@ STRICT RULES:
    - Do NOT use heading syntax (# or ##) on any line that contains pipe characters (|).
 
 RAW EXTRACTED CONTENT:
-{content[:60000]}
+{content[:4000]}
 
 Generate the professional {doc_name} Markdown now:"""
 
+        # Restored Groq as primary
+        print("Using Groq for Beautify...")
         chat_completion = client.chat.completions.create(
             messages=[
                 {"role": "system", "content": "You are an expert Instructional Designer who converts raw data into professional, industry-standard documents."},
                 {"role": "user", "content": prompt}
             ],
             model="llama-3.1-8b-instant",
-            temperature=0.3, # Lower temperature for better structural adherence
-            max_tokens=4500,
+            temperature=0.3, 
+            max_tokens=2000,
         )
         result = chat_completion.choices[0].message.content
-        # Post-process to fix common AI table formatting issues
-        result = fix_markdown_tables(result)
-        return result
+        return fix_markdown_tables(result)
             
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error beautifying content: {str(e)}")
