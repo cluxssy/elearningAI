@@ -20,7 +20,7 @@ import requests
 def parse_document_into_sections(doc: str) -> List[Dict]:
     sections, lines, current_raw = [], doc.split("\n"), []
     # Support Markdown headers (# Module, ## Screen, etc.) and optional whitespace
-    screen_re = re.compile(r"^\s*#*\s*(Screen\s+(\d+(\.\d+)*):?\s+(.*))", re.IGNORECASE)
+    screen_re = re.compile(r"^\s*\**\s*#*\s*(Screen\s+(\d+(?:\.\d+)*)\s*(?:Title\s*)?[:\-|]\s*(.*))\**", re.IGNORECASE)
     module_re = re.compile(r"^\s*#*\s*(Module\s+(\d+|[A-Z]):\s+.*)", re.IGNORECASE)
     i = 0
     while i < len(lines):

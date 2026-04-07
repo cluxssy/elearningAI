@@ -253,16 +253,21 @@ Screen {module_num}.1 Title: [Descriptive Title]
 
 Generate 5-8 screens for Module {module_num} now:"""
 
-    r = client.chat.completions.create(
-        messages=[
-            {"role": "system", "content": "You are a senior eLearning Storyboard Developer. Write production-ready storyboards. OST = real learner text. Audio = actual narrator script (conversational, never meta-descriptions like 'The narrator explains'). Visual = specific graphic designer directions with named images and animations. No AI slop."},
-            {"role": "user", "content": prompt}
-        ],
-        model="llama-3.1-8b-instant",
-        temperature=0.7,
-        max_tokens=2000,
-    )
-    return r.choices[0].message.content
+    system_msg = "You are a senior eLearning Storyboard Developer. Write production-ready storyboards. OST = real learner text. Audio = actual narrator script (conversational, never meta-descriptions like 'The narrator explains'). Visual = specific graphic designer directions with named images and animations. No AI slop."
+    try:
+        r = client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": system_msg},
+                {"role": "user", "content": prompt}
+            ],
+            model="llama-3.1-8b-instant",
+            temperature=0.7,
+            max_tokens=2000,
+        )
+        return r.choices[0].message.content
+    except Exception as groq_err:
+        print(f"Storyboard Type 1 Module {module_num} — Groq failed, switching to Pico: {groq_err}")
+        return _call_pico_llm(prompt, system_msg)
 
 
 def _generate_single_module_type2(client, module_num: int, total_modules: int, design_doc: str, intake_data: Dict, content: str, strategies: Dict) -> str:
@@ -295,16 +300,21 @@ MODULE {module_num}: [Title from Design Doc]
 
 Generate 5-8 rows for Module {module_num} now:"""
 
-    r = client.chat.completions.create(
-        messages=[
-            {"role": "system", "content": "You are a senior eLearning Storyboard Developer. Write production-ready storyboards. On-screen text = real learner content. Audio = actual narrator script (conversational, never 'The narrator explains'). Visual = specific developer directions. No AI slop."},
-            {"role": "user", "content": prompt}
-        ],
-        model="llama-3.1-8b-instant",
-        temperature=0.7,
-        max_tokens=2000,
-    )
-    return r.choices[0].message.content
+    system_msg = "You are a senior eLearning Storyboard Developer. Write production-ready storyboards. On-screen text = real learner content. Audio = actual narrator script (conversational, never 'The narrator explains'). Visual = specific developer directions. No AI slop."
+    try:
+        r = client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": system_msg},
+                {"role": "user", "content": prompt}
+            ],
+            model="llama-3.1-8b-instant",
+            temperature=0.7,
+            max_tokens=2000,
+        )
+        return r.choices[0].message.content
+    except Exception as groq_err:
+        print(f"Storyboard Type 2 Module {module_num} — Groq failed, switching to Pico: {groq_err}")
+        return _call_pico_llm(prompt, system_msg)
 
 
 @retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=3, min=5, max=60), reraise=True)
