@@ -85,3 +85,30 @@ instructional_ai_system/
 - **Hosting**: The system is self-hosted (FastAPI + MySQL). Costs depend on your cloud provider (AWS, Azure, Vercel, etc.).
 - **AI Costs**: Groq is significantly cheaper and faster than GPT-4, offering "Instant" generation speeds (300+ tokens/sec). For high-volume enterprise use, a paid Groq production tier is recommended.
 - **Security**: All API keys are stored server-side in `.env`, never exposed to the frontend.
+# 🎓 AI Instructional Design Tool (AWS / Production)
+
+This is a professional-grade AI tool for instructional designers. It converts raw project data into comprehensive **Design Documents** and detailed **Tabular Storyboards**.
+
+## 🚀 Deployment (AWS / Persistence)
+
+The project is configured for **EC2 / RDS** and runs persistently using **PM2**.
+
+| Command | Action |
+|---------|--------|
+| `./start.sh` | Setup .env interactively & launch both services locally |
+| `pm2 status` | Check status of persistent processes |
+| `pm2 logs` | View generation logs and fallback success |
+
+## 📁 Key Documentation
+
+| Document | Purpose |
+|----------|---------|
+| [📖 User Guide](./docs/USER_GUIDE.md) | For Instructional Designers: How to use the app to generate 9 modules. |
+| [🛠️ Technical Specs](./docs/TECHNICAL.md) | For Developers: Architecture, AI fallback logic, and token limits. |
+
+## 🌟 Enhanced Intelligence Features
+
+- **9-Module Persistence**: Never skips table rows, even for large courses.
+- **Extreme Detail Mode**: Unlocks up to **40,000 characters** of processing context.
+- **Zero-Failure AI**: Automatically switches from **Groq (Fast)** to **Pico (Stable)** if the request is too large.
+- **Smart Formatting**: Post-processes AI tables to ensure clean Markdown/Tabular export.
