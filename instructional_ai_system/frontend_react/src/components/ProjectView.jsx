@@ -349,7 +349,8 @@ export default function ProjectView({ projectId, onBack }) {
         setSbProgress({ current: 0, total: 0, status: 'Starting generation...' });
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:8000/api/storyboard/${projectId}/generate?storyboard_type=${encodeURIComponent(sbType)}`, {
+            const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+            const response = await fetch(`${apiBase}/storyboard/${projectId}/generate?storyboard_type=${encodeURIComponent(sbType)}`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'text/event-stream' }
             });
