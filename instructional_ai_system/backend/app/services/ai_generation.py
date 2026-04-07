@@ -233,23 +233,23 @@ SOURCE CONTENT:
 {content[:2000]}
 
 RULES:
-- OST: Actual text learner reads. Real facts, definitions, bullet points. NEVER "The narrator explains..."
-- AUDIO: Actual narrator script. Conversational, professional, 5-8 sentences. End with "Click Next to continue." NEVER "The narrator says..."
-- VISUAL: Specific designer directions. Name images ("Show static image of X"), describe animations, layout, navigation.
-- No placeholders. No AI buzzwords. Content from source only.
-- Use <br> for line breaks in cells. Each row = ONE line.
+- MANDATORY: You MUST include the separator row `| :--- | :--- | :--- |` for every screen.
+- OST: Actual text learner reads. Real facts, definitions, bullet points.
+- AUDIO: Actual narrator script. Conversational, 5-8 sentences. End with "Click Next to continue."
+- VISUAL: Specific designer directions. Name images, describe animations.
+- Use <br> for line breaks. Each row = ONE line.
 
-FORMAT:
+FORMAT (FOLLOW THIS EXACTLY):
 
 =============================================================================
-Module {module_num}: [Title from Design Doc]
+Module {module_num}: [Title]
 =============================================================================
 
-Screen {module_num}.1 Title: [Descriptive Title]
+Screen {module_num}.1 Title: [Title]
 
 | ON-SCREEN TEXT (OST) | AUDIO NARRATION | VISUAL INSTRUCTIONS & DEVELOPER NOTES |
 | :--- | :--- | :--- |
-| [Actual text with bullets] | [Actual narration script] | [Specific graphic directions] |
+| [Text] | [Script] | [Directions] |
 
 Generate 5-8 screens for Module {module_num} now:"""
 

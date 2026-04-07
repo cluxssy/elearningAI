@@ -59,7 +59,7 @@ def parse_document_into_sections(doc: str) -> List[Dict]:
                 "title_line": title_line, 
                 "table_lines": table_lines
             })
-        elif lines[i].strip().startswith("|") and (i+1 < len(lines) and re.match(r"^|[\s\-:|]+\|$", lines[i+1].strip())):
+        elif lines[i].strip().startswith("|") and (lines[i].count("|") > 2 or (i+1 < len(lines) and re.match(r"^\|[\s\-:|]+\|$", lines[i+1].strip()))):
             # This is a standalone table (not under a specific Screen/Module heading)
             if current_raw:
                 sections.append({"type": "raw", "content": "\n".join(current_raw)})
