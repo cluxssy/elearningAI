@@ -1,0 +1,47 @@
+# AI Instructional Design System — Backend Dependencies
+# Install with: pip install -r requirements.txt
+
+# ── Web Framework ──────────────────────────────────────────────────────────────
+fastapi==0.135.1
+uvicorn[standard]==0.42.0
+python-multipart==0.0.22
+starlette==0.52.1
+
+# ── Database ────────────────────────────────────────────────────────────────────
+SQLAlchemy==2.0.48
+PyMySQL==1.1.2               # MySQL driver (used in DATABASE_URL as mysql+pymysql://...)
+
+# ── Auth & Security ─────────────────────────────────────────────────────────────
+passlib==1.7.4
+bcrypt==5.0.0
+python-jose==3.5.0
+
+# ── AI / LLM ────────────────────────────────────────────────────────────────────
+groq==1.1.1                  # Primary LLM provider
+tenacity==9.1.4              # Retry logic for API calls
+requests==2.32.5             # Used for Pico LLM fallback API calls
+httpx==0.28.1                # Async HTTP client
+
+# ── File Parsing (Content Extraction) ─────────────────────────────────────────
+PyPDF2==3.0.1                # PDF extraction
+python-docx==1.2.0           # Word document extraction
+python-pptx==1.0.2           # PowerPoint extraction
+openpyxl==3.1.5              # Excel extraction
+xlsxwriter==3.2.9            # Excel export/writing
+lxml==6.0.2                  # XML/HTML parsing helper
+beautifulsoup4==4.14.3       # HTML parsing
+pillow==12.1.1               # Image handling
+
+# ── Email ───────────────────────────────────────────────────────────────────────
+fastapi-mail==1.6.2
+aiosmtplib==5.1.0
+
+# ── Configuration & Environment ─────────────────────────────────────────────────
+python-dotenv==1.2.2
+pydantic==2.12.5
+pydantic-settings==2.13.1
+
+# ── Utilities ───────────────────────────────────────────────────────────────────
+json_repair==0.58.6          # Fixes malformed JSON from LLM outputs
+youtube-transcript-api==1.2.4
+annotated-types==0.7.0
